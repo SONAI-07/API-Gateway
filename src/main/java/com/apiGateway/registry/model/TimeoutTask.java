@@ -4,18 +4,18 @@ package com.apiGateway.registry.model;
 import lombok.*;
 
 @Getter
-
+@Setter
 
 public class TimeoutTask {
 
-   private String InstanceID ;
+   private String instanceID ;
 
     private int remainingRounds ;
 
-    private boolean isCancelled=false;
+    public boolean isCancelled=false;
 
       public TimeoutTask(String instanceID, int remainingRounds) {
-        this.InstanceID = instanceID;
+        this.instanceID = instanceID;
         this.remainingRounds = remainingRounds;
     }
 
