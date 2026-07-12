@@ -3,12 +3,10 @@ package com.apiGateway.registry.service;
 
 import com.apiGateway.registry.model.ServiceInstance;
 import com.apiGateway.registry.model.TimeoutTask;
-
 import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import java.time.Instant;
@@ -19,16 +17,19 @@ import java.time.Instant;
 public class RegisterService {
 
 
-    private final instanceEviction instanceEviction;
+    private final InstanceEviction instanceEviction;
 
     public ConcurrentHashMap<String, ConcurrentHashMap<String, ServiceInstance>> serviceFinder
             = new ConcurrentHashMap<>();
 
     private static final Logger logger = LoggerFactory.getLogger(RegisterService.class);
 
-    public RegisterService(instanceEviction instanceEviction) {
+    public RegisterService(InstanceEviction instanceEviction) {
         this.instanceEviction = instanceEviction;
     }
+
+
+
 
 
     // registers the services and their Instance ID's
@@ -47,8 +48,14 @@ public class RegisterService {
 
         innerMap.put(instanceID, serviceinstance);
 
+        instanceEviction.scheduleTimeout(serviceinstance, instanceID, 90);
+
         return Mono.empty();
     }
+
+
+
+
 
 
 
@@ -57,7 +64,7 @@ public class RegisterService {
     //services update their existence
     //carts are assigned their respective indexes
 
-    public Mono<Boolean> renewHeartbeat(String serviceName, String instanceID) {
+    public boolean renewHeartbeat(String serviceName, String instanceID) {
 
         ServiceInstance serviceinstance;
         Duration duration;
@@ -81,37 +88,49 @@ public class RegisterService {
 
 
 
-                    if (oldTask != null) {
+                    if (oldTask != null)
 
-                        oldTask.isCancelled = true;
+                             oldTask.isCancelled = true;
 
-                        TimeoutTask newTask = instanceEviction.scheduleTimeout(instanceID, 90);
 
-                        serviceinstance.setTimeoutReference(newTask);
-                    }
+                    instanceEviction.scheduleTimeout(serviceinstance , instanceID , 90);
 
-                    return Mono.just(true);
+
+                    return true;
                 }
             }
             else
             {
                 logger.info("Re-register the service instance :{}", instanceID);
 
-                    return Mono.just(false);
+                    return false;
             }
 
 
         }
 
         else
+
             logger.info("Register the Service over the Eureka : {}", serviceName);
 
 
+        return false ;
+    }
 
-        return Mono.just(false);
+
+
+
+
+
+    public void deleteInstance(){
+
 
 
     }
+
+
+
+
 
 
 }

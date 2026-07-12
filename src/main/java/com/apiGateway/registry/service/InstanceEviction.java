@@ -2,64 +2,81 @@ package com.apiGateway.registry.service;
 
 
 
+import com.apiGateway.registry.model.ServiceInstance;
 import com.apiGateway.registry.model.TimeoutTask;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 
 @Component
-public class instanceEviction {
+public class InstanceEviction {
 
-    private final RegisterService registerService;
 
-    private int currentTick = 0;
+    @Lazy
+    private RegisterService registerService;
 
-    public ConcurrentLinkedQueue<TimeoutTask>[] wheel = new ConcurrentLinkedQueue[60];
-
-    public instanceEviction(RegisterService registerService) {
+    public InstanceEviction(RegisterService registerService) {
         this.registerService = registerService;
     }
 
+    private volatile int currentTick = 0;
+
+    public ConcurrentLinkedQueue<TimeoutTask>[] wheel = new ConcurrentLinkedQueue[60];
 
 
+
+    @PostConstruct
     public void initializer ()
     {
         for (int i = 0; i < wheel.length; i++) {
             wheel[i] = new ConcurrentLinkedQueue<>();
         }
+
     }
 
 
 
 
-    // future cart calculation on Gateway ping
-    public TimeoutTask scheduleTimeout (String instanceId, int delaySeconds) {
+    // future-cart calculation on Gateway ping
+    public void scheduleTimeout (ServiceInstance serviceInst , String instanceId, int delaySeconds) {
 
 
         int ticksToMove = delaySeconds;
 
-        int newCart = (currentTick + ticksToMove) % 60;
+        int newCartIndex = (currentTick + ticksToMove) % 60;
 
         int rounds = ticksToMove / 60 ;
 
+
         TimeoutTask newTask = new TimeoutTask(instanceId, rounds);
 
-        wheel[newCart].add(newTask);
+        wheel[newCartIndex].add(newTask);
 
-        return newTask;
+
+        serviceInst.setTimeoutReference(newTask);
+
 
     }
 
 
 
-      @Scheduled(fixedDelay = 1000)
-      public void advanceWheel () {
+
+
+
+    @Scheduled(fixedDelay = 1000)
+    public void advanceWheel () {
+
+        currentTick = (currentTick + 1) % 60;
+
           ConcurrentLinkedQueue<TimeoutTask> cart = wheel[currentTick];
 
-          currentTick = (currentTick + 1) % 60;
 
-          for (TimeoutTask task : cart) {
+          for (TimeoutTask task : cart) // run the loop for each TimeoutTask object that is within the cart
+          {
               if (task.isCancelled) {
                   cart.remove(task); // Throw it in the trash
                   continue;
@@ -69,21 +86,22 @@ public class instanceEviction {
                   continue;
               }
 
-              // IF WE GET HERE: It's not cancelled, and rounds == 0.
+              // It's not canceled, and rounds == 0.
               // EXECUTE THE EVICTION!
-              executeEviction(task.getInstanceID());
+              registerService.deleteInstance();
               cart.remove(task); // Remove from wheel
+
           }
 
 
       }
 
-         public void executeEviction  (String instanceID)
-         {
 
-     }
 
 
 
 }
+
+
+
 

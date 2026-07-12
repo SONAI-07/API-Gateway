@@ -1,6 +1,8 @@
 package com.apiGateway.registry.model;
 
 import lombok.*;
+import reactor.core.publisher.Mono;
+
 import java.time.Instant;
 
 @Getter
@@ -19,6 +21,10 @@ public class ServiceInstance
 
     //eg: Port-8081
     private Long Port;
+
+    private int weight;
+
+    private int activeConnections;
 
 
     private Instant lastHeartBeatTime;
