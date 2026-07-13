@@ -17,6 +17,9 @@ public class ServiceInstance
     //eg: OrderService-123.456.7.8.8081 , OrderService-123.456.7.8.8082
     private String instanceID;
 
+    //IP address of the running machine/server
+    private String host;
+
     private volatile TimeoutTask timeoutReference;
 
     //eg: Port-8081

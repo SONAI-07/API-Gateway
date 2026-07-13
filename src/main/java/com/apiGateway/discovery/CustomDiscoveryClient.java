@@ -7,10 +7,11 @@ import com.apiGateway.registry.service.RegisterService;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.cloud.client.DefaultServiceInstance;
+
 
 
 @Component
@@ -30,6 +31,8 @@ import java.util.concurrent.ConcurrentHashMap;
     }
 
 
+
+
     @Override
     public Flux<String> getServices() {
 
@@ -41,9 +44,13 @@ import java.util.concurrent.ConcurrentHashMap;
     }
 
 
+
+
+
+
+
     @Override
     public Flux<org.springframework.cloud.client.ServiceInstance> getInstances(String serviceName) {
-
 
         if (registerService.serviceFinder.containsKey(serviceName)) {
 
@@ -53,24 +60,43 @@ import java.util.concurrent.ConcurrentHashMap;
 
                 ConcurrentHashMap<String, ServiceInstance> innerMap = registerService.serviceFinder.get(serviceName);
 
-                for (ServiceInstance serviceinstance : innerMap.values()) {
 
-                   // map the default instances ....
 
-                    
-                    return Flux.fromIterable(list);
+
+
+
+                for (ServiceInstance copyInstance : innerMap.values()) {
+
+                    HashMap<String,String> metadata = new HashMap<>();
+
+                    int instanceWeight = copyInstance.getWeight() > 0 ? copyInstance.getWeight() : 1;
+                    metadata.put("weight", String.valueOf(instanceWeight));
+                    metadata.put("activeConnections", String.valueOf(copyInstance.getActiveConnections()));
+                    int port = Math.toIntExact(copyInstance.getPort());
+
+
+                    DefaultServiceInstance instance = new DefaultServiceInstance(
+                            copyInstance.getInstanceID(),
+                            copyInstance.getServiceName() ,
+                            copyInstance.getHost() ,
+                            port,
+                            false,
+                            metadata
+                    );
+
+                    list.add(instance);
+
                 }
-            }
 
-        }
+                return Flux.fromIterable(list);
+
+
+                }
+
+             }
 
         return Flux.empty();
 
-
     }
-
-
-
-
 
 }
