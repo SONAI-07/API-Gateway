@@ -16,12 +16,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class InstanceEviction {
 
 
+    @Autowired
     @Lazy
     private RegisterService registerService;
-
-    public InstanceEviction(RegisterService registerService) {
-        this.registerService = registerService;
-    }
 
     private volatile int currentTick = 0;
 

@@ -63,8 +63,6 @@ import org.springframework.cloud.client.DefaultServiceInstance;
 
 
 
-
-
                 for (ServiceInstance copyInstance : innerMap.values()) {
 
                     HashMap<String,String> metadata = new HashMap<>();
