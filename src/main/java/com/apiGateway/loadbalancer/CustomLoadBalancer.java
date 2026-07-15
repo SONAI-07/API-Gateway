@@ -1,6 +1,7 @@
 package com.apiGateway.loadbalancer;
 
 
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.DefaultResponse;
@@ -10,9 +11,9 @@ import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.loadbalancer.core.NoopServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.List;
+
 
 
 
@@ -24,24 +25,19 @@ public class CustomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
     private final String serviceName;
 
 
-
-    public CustomLoadBalancer ( ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider
-    , String serviceName) {
+    public CustomLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider
+            , String serviceName) {
 
         this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
         this.serviceName = serviceName;
     }
 
 
-
     @Override
-    public Mono<Response<ServiceInstance>> choose(Request request)
-    {
+    public Mono<Response<ServiceInstance>> choose(Request request) {
 
         ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
                 .getIfAvailable(NoopServiceInstanceListSupplier::new);
-
-
 
 
         if (supplier == null) {
@@ -68,10 +64,10 @@ public class CustomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
     }
 
 
+    private ServiceInstance activeLeastConnection(List<ServiceInstance> instances) {
+
+        return instances.get(0);
     }
 
 
-   private ServiceInstance activeLeastConnection (List<ServiceInstance> instances) {
-
-       return instances.get(0);
-   }
+}
