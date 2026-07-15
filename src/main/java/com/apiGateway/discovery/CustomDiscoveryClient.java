@@ -7,10 +7,10 @@ import com.apiGateway.registry.service.RegisterService;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.cloud.client.DefaultServiceInstance;
+
 
 
 
@@ -20,9 +20,12 @@ import org.springframework.cloud.client.DefaultServiceInstance;
 
     private RegisterService registerService;
 
+
     public CustomDiscoveryClient(RegisterService registerService) {
         this.registerService = registerService;
     }
+
+
 
 
     @Override
