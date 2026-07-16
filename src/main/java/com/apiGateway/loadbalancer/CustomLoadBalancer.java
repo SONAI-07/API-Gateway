@@ -44,7 +44,6 @@ public class CustomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
             return Mono.just(new EmptyResponse());
         }
 
-        // Step 2 & 3: Get the Flux and grab the first emitted list
         return supplier.get(request)
                 .next() // Converts Flux<List<ServiceInstance>> to Mono<List<ServiceInstance>>
                 .map(instances -> {
@@ -66,7 +65,22 @@ public class CustomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 
     private ServiceInstance activeLeastConnection(List<ServiceInstance> instances) {
 
-        return instances.get(0);
+
+
+        ServiceInstance proxy = instances.get(0);
+
+        int winningInstance = Integer.parseInt((proxy.getMetadata()).get("activeConnections"));
+
+
+        for (ServiceInstance instance : instances) {
+
+         if (Integer.parseInt((instance.getMetadata()).get("activeConnections")) < winningInstance)
+
+             proxy = instance;
+
+      }
+
+      return proxy ;
     }
 
 
