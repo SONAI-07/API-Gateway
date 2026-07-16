@@ -69,7 +69,7 @@ public class CustomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 
         ServiceInstance proxy = instances.get(0);
 
-        int winningInstance = Integer.parseInt((proxy.getMetadata()).get("activeConnections"));
+        int winningInstance = Integer.parseInt((proxy.getMetadata()).getOrDefault("activeConnections","0"));
 
 
         for (ServiceInstance instance : instances) {

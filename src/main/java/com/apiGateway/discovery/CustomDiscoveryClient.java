@@ -14,16 +14,14 @@ import org.springframework.cloud.client.DefaultServiceInstance;
 
 
 
-@Component
+ @Component
  class CustomDiscoveryClient implements ReactiveDiscoveryClient {
 
 
     private RegisterService registerService;
 
 
-    public CustomDiscoveryClient(RegisterService registerService) {
-        this.registerService = registerService;
-    }
+    public CustomDiscoveryClient(RegisterService registerService) {this.registerService = registerService;}
 
 
 
@@ -85,12 +83,10 @@ import org.springframework.cloud.client.DefaultServiceInstance;
 
                     list.add(instance);
 
-                }
+                   }
 
-                return Flux.fromIterable(list);
-
-
-                }
+                      return Flux.fromIterable(list);
+                 }
 
              }
 
